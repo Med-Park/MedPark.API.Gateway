@@ -66,8 +66,8 @@ steps:
       Write-Host ##vso[task.setvariable variable=imageTag;isOutput=true]latest
       Write-Host "New tag - $env:imageTag"
     } else {
-      Write-Host "Current Branch is dev/feature"
       Write-Host ##vso[task.setvariable variable=imageTag]dev
+      Write-Host "New tag - $env:imageTag"
     }
   displayName: 'Set Docker image tag based on branch'
   condition: and(succeeded(), or(eq(variables['build.SourceBranch'], 'refs/heads/dev'), eq(variables['build.SourceBranch'], 'refs/heads/master')))
