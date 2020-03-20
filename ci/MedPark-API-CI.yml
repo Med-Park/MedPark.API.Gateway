@@ -64,10 +64,10 @@ steps:
 
     if ($currentBranch -eq 'refs/heads/master') {
       Write-Output "##vso[task.setvariable variable=imageTag;isOutput=true]latest"
-      Write-Host "New tag - $env:imageTag"
+      Write-Host "New tag - latest"
     } else {
       Write-Output "##vso[task.setvariable variable=imageTag]dev"
-      Write-Host "New tag - $env:imageTag"
+      Write-Host "New tag - Dev"
     }
   displayName: 'Set Docker image tag based on branch'
   condition: and(succeeded(), or(eq(variables['build.SourceBranch'], 'refs/heads/dev'), eq(variables['build.SourceBranch'], 'refs/heads/master')))
