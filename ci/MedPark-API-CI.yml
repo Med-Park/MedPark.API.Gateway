@@ -72,6 +72,7 @@ steps:
       Write-Host ##vso[task.setvariable variable=imageTag]dev
     }
   displayName: 'Set Docker image tag based on branch'
+  condition: and(succeeded(), or(eq(variables['build.SourceBranch'], 'refs/heads/dev'), eq(variables['build.SourceBranch'], 'refs/heads/master')))
   enabled: true
 
 - task: Docker@2
