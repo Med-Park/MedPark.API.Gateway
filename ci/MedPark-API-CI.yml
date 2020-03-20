@@ -16,9 +16,6 @@ pr:
   branches:
     include:
       - dev
-  paths:
-    include:
-      - "src"
 
 pool:
   vmImage: 'Ubuntu-16.04' 
