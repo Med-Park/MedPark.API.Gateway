@@ -24,7 +24,7 @@ variables:
   solution: '**/*.sln'
   buildPlatform: 'Any CPU'
   buildConfiguration: 'Release'
-  proj-dir: "src/MedPark.API.Gateway/"
+  proj-dir: "src/"
 
 steps:
 - task: NuGetToolInstaller@1
