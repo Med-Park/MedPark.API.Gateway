@@ -4,9 +4,21 @@
 # https://docs.microsoft.com/azure/devops/pipelines/languages/dotnet-core
 
 trigger:
-- dev
-- master
-- feature/*
+  branches:
+    include:
+      - master
+      - dev
+  paths:
+    include:
+      - "src"
+
+pr:
+  branches:
+    include:
+      - dev
+  paths:
+    include:
+      - "src"
 
 pool:
   vmImage: 'Ubuntu-16.04' 
