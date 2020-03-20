@@ -22,6 +22,7 @@ variables:
   buildPlatform: 'Any CPU'
   buildConfiguration: 'Release'
   proj-dir: "src/"
+  imageTag: ''
 
 steps:
 - task: NuGetToolInstaller@1
