@@ -4,9 +4,18 @@
 # https://docs.microsoft.com/azure/devops/pipelines/languages/dotnet-core
 
 trigger:
-- dev
-- master
-- feature/*
+  branches:
+    include:
+      - master
+      - dev
+  paths:
+    include:
+      - "src"
+
+pr:
+  branches:
+    include:
+      - dev
 
 pool:
   vmImage: 'Ubuntu-16.04' 
@@ -15,7 +24,7 @@ variables:
   solution: '**/*.sln'
   buildPlatform: 'Any CPU'
   buildConfiguration: 'Release'
-  proj-dir: "src/MedPark.API.Gateway/"
+  proj-dir: "src/"
 
 steps:
 - task: NuGetToolInstaller@1
@@ -41,23 +50,40 @@ steps:
     command: 'build'
     projects: '$(proj-dir)/MedPark.API.Gateway.csproj'
     arguments: '-c Release'
-  enabled: false
+  enabled: true
 
 - task: Docker@2
+  condition: and(succeeded(), or(eq(variables['build.SourceBranch'], 'refs/heads/dev'), eq(variables['build.SourceBranch'], 'refs/heads/master')))
   displayName: 'Login to Docker Hub'
   inputs:
     containerRegistry: 'docker-hub-connection'
     command: 'login'
   enabled: true
 
+- powershell: |
+    $currentBranch = "$(build.SourceBranch)"
+    Write-Host "Current Branch is: $currentBranch"
+
+    if ($currentBranch -eq 'refs/heads/master') {
+      Write-Host ##vso[task.setvariable variable=imageTag;isOutput=true]latest
+      Write-Host "New tag - $env:imageTag"
+    } else {
+      Write-Host "Current Branch is dev/feature"
+      Write-Host ##vso[task.setvariable variable=imageTag]dev
+    }
+  displayName: 'Set Docker image tag based on branch'
+  condition: and(succeeded(), or(eq(variables['build.SourceBranch'], 'refs/heads/dev'), eq(variables['build.SourceBranch'], 'refs/heads/master')))
+  enabled: true
+
 - task: Docker@2
+  condition: and(succeeded(), or(eq(variables['build.SourceBranch'], 'refs/heads/dev'), eq(variables['build.SourceBranch'], 'refs/heads/master')))
   displayName: 'Build and Push docker image'
   inputs:
     containerRegistry: 'docker-hub-connection'
     repository: 'geradedev/medpark-api'
     command: 'buildAndPush'
     Dockerfile: '$(proj-dir)/Dockerfile.multistage'
-    tags: dev
+    tags: $(imageTag)
   enabled: true
 
 - task: PublishBuildArtifacts@1
