@@ -74,5 +74,28 @@ namespace MedPark.API.Gateway.Controllers
 
             return Accepted();
         }
+
+        [HttpPost("addmedicalscheme")]
+        public async Task<IActionResult> CreateAddress([FromBody] AddCustomerMedicalScheme command)
+        {
+            try
+            {
+                await _busPublisher.SendAsync(command, CorrelationContext.Empty);
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(ex.Message);
+            }
+
+            return Accepted();
+        }
+
+        [HttpGet("getcustomermedicalschemes/{customerid}")]
+        public async Task<IActionResult> GetCustomerMedicalSchemes(Guid customerid)
+        {
+            var customer = await _customerService.GetCustomerMedicalSchemes(customerid);
+
+            return Ok(customer);
+        }
     }
 }

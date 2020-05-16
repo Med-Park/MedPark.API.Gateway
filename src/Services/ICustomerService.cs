@@ -17,5 +17,8 @@ namespace MedPark.API.Gateway.Services
 
         [Get("/address/{id}")]
         Task<List<Address>> GetAddreses([Path] Guid id);
+
+        [Get("/medicalschemes/{customerid}")]
+        Task<List<CustomerMedicalSchemeItem>> GetCustomerMedicalSchemes([Path] Guid customerid);
     }
 }
