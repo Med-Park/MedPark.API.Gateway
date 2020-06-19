@@ -10,31 +10,43 @@ namespace MedPark.API.Gateway.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
-    public class BookingsController : ControllerBase 
+    public class BookingsController : BaseController 
     {
-        private IBusPublisher _busPublisher { get; set; }
         private IBookingService _bookingService;
 
-        public BookingsController(IBusPublisher busPublisher, IBookingService bookingService)
+        public BookingsController(IBusPublisher busPublisher, IBookingService bookingService) : base(busPublisher)
         {
-            _busPublisher = busPublisher;
             _bookingService = bookingService;
         }
 
         [HttpGet("getspecialistappointments/{specialistid}")]
         public async Task<IActionResult> GetAppointmentsBySpecialistId([FromRoute] Guid specialistid)
         {
-            var specialistAppointments = await _bookingService.GetSpecialistAppointments(specialistid);
+            try
+            {
+                var specialistAppointments = await _bookingService.GetSpecialistAppointments(specialistid);
 
-            return Ok(specialistAppointments);
+                return Ok(QueryResult.QuerySuccess(specialistAppointments));
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(ex.Message);
+            }
         }
 
         [HttpGet("getpatientappointments/{customerid}")]
         public async Task<IActionResult> GetAppointmentsByPatientId([FromRoute] Guid customerid)
         {
-            var patientAppointments = await _bookingService.GetPatientAppointments(customerid);
+            try
+            {
+                var patientAppointments = await _bookingService.GetPatientAppointments(customerid);
 
-            return Ok(patientAppointments);
+                return Ok(QueryResult.QuerySuccess(patientAppointments));
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(ex.Message);
+            }
         }
 
         [HttpGet("{appointmentid}/details")]
@@ -44,6 +56,10 @@ namespace MedPark.API.Gateway.Controllers
 
             return Ok(appointmentDetail);
         }
+
+
+
+
 
         [HttpPost("addappointment")]
         public async Task<IActionResult> AddNewAppointment([FromBody] AddAppointment command)

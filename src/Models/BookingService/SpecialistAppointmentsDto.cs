@@ -7,12 +7,10 @@ namespace MedPark.API.Gateway.Models.BookingService
 {
     public class SpecialistAppointmentsDto
     {
-        public SpecialistDto SpecialisttDetails { get; set; }
         public IEnumerable<SpecialistAppointmentDto> BookingDetails { get; set; }
 
         public SpecialistAppointmentsDto()
         {
-            SpecialisttDetails = new SpecialistDto();
         }
     }
 }
