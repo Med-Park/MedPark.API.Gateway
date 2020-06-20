@@ -28,6 +28,6 @@ namespace MedPark.API.Gateway
                     webBuilder.UseContentRoot(Directory.GetCurrentDirectory())
                     .UseIISIntegration()
                     .UseStartup<Startup>();
-                });
+                }).UseLogging();
     }
 }
