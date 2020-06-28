@@ -5,8 +5,10 @@ using System.Reflection;
 using System.Threading.Tasks;
 using Autofac;
 using Autofac.Extensions.DependencyInjection;
+using Consul;
 using MedPark.API.Gateway.Controllers;
 using MedPark.API.Gateway.Services;
+using MedPark.Common.Consul;
 using MedPark.Common.RabbitMq;
 using MedPark.Common.Redis;
 using MedPark.Common.RestEase;
@@ -37,16 +39,16 @@ namespace MedPark.API.Gateway
         // This method gets called by the runtime. Use this method to add services to the container.
         public void ConfigureServices(IServiceCollection services)
         {
-            services.AddCustomAPIVersioning()
-                    .AddCustomCors()
-                    .AddRestEaseServices();
+            services.AddHealthChecks();
 
+            services.AddCustomAPIVersioning()
+                    .AddCustomCors();
+
+            services.AddConsul();
             services.AddRedis(Configuration);
+            services.AddOptions();
 
             services.AddMvc(mvc => mvc.EnableEndpointRouting = false).AddNewtonsoftJson().SetCompatibilityVersion(CompatibilityVersion.Version_3_0);
-    ;
-            services.AddOptions();
-            services.Configure<RestEaseOptions>(Configuration.GetSection("restEase"));
         }
 
         public void ConfigureContainer(ContainerBuilder builder)
@@ -56,7 +58,7 @@ namespace MedPark.API.Gateway
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
-        public void Configure(IApplicationBuilder app, IHostEnvironment env)
+        public void Configure(IApplicationBuilder app, IHostEnvironment env, IHostApplicationLifetime applifetime, IConsulClient consulClient)
         {
             app.UseCors("CorsPolicy");
 
@@ -70,7 +72,20 @@ namespace MedPark.API.Gateway
                 app.UseHsts();
             }
 
+            app.UseRouting();
+            app.UseEndpoints(endpoints =>
+            {
+                endpoints.MapHealthChecks("/health");
+            });
+
             app.UseRabbitMq();
+            
+            var consulServiceID = app.UseConsul();
+            applifetime.ApplicationStopped.Register(() =>
+            {
+                consulClient.Agent.ServiceDeregister(consulServiceID);
+                Container.Dispose();
+            });
 
             app.UseHttpsRedirection();
             app.UseMvc();
@@ -89,7 +104,6 @@ namespace MedPark.API.Gateway
             services.AddDefaultEndpoint<IMedicalPracticeService>("med-practice-service");
             services.AddDefaultEndpoint<IBookingService>("booking-service");
             services.AddDefaultEndpoint<ICatalogService>("catalog-service");
-            services.AddDefaultEndpoint<IBasketService>("basket-service");
             services.AddDefaultEndpoint<IOrderService>("order-service");
             services.AddDefaultEndpoint<IPaymentService>("payment-service");
 
