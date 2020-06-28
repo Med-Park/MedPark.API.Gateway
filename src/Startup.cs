@@ -27,7 +27,6 @@ namespace MedPark.API.Gateway
     public class Startup
     {
         public IConfiguration Configuration { get; }
-        public IContainer Container { get; private set; }
         IHostEnvironment _env;
 
         public Startup(IConfiguration configuration, IHostEnvironment env)
@@ -84,7 +83,6 @@ namespace MedPark.API.Gateway
             applifetime.ApplicationStopped.Register(() =>
             {
                 consulClient.Agent.ServiceDeregister(consulServiceID);
-                Container.Dispose();
             });
 
             app.UseHttpsRedirection();
